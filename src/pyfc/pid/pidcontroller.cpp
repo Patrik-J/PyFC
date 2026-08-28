@@ -6,10 +6,18 @@ PIDController::PIDController(DoubleVector params, double setpoint) : FeedbackCon
     this->params = params;
 };
 
+PIDController::~PIDController() {
+    delete[] this->last_points;
+    delete[] this->last_times;
+};
+
 double PIDController::requestLoop(double input) {
     if (this->params.size() != 3)
         throw FeedbackControllerException("PID params were not set!");
     
+    if (!this->intialized) 
+        throw FeedbackControllerException("Feedback controller was not initialized! Use .init()");
+
     // get the difference to use in the PID loop
     double diff = input - this->setpoint;
 
@@ -21,7 +29,7 @@ double PIDController::requestLoop(double input) {
     this->last_times[lii] = this->timer.currentMicros();
     this->last_input_index = lii;
 
-    // sum of all three parts
+    // sum of all three partsw
     double sum = 0.0;
 
     // proportional
@@ -39,37 +47,9 @@ double PIDController::requestLoop(double input) {
     return sum;
 };
 
-void PIDController::init() {
-    this->timer = Timer();
-    this->timer.start();
-    this->last_points = new double[PIDController::MAX_STORED] {0.0};
-    this->last_times = new double[PIDController::MAX_STORED] {0.0};
-    this->last_input_index = 0;
-
-    if (this->params.size() == 0)
-        this->params = randomVector(3);
-};
-
-void PIDController::setCaps(double time_integral, double derivative) {
-    this->ti_cap = time_integral;
-    this->dv_cap = derivative;
-};
-
-DoubleVector PIDController::getCaps() {
-    return {this->ti_cap, this->dv_cap};
-};
-
-void PIDController::setGains(DoubleVector gains) {
-    this->params = gains;
-};
-
-DoubleVector PIDController::getGains() {
-    return this->params;
-};
-
 void PIDController::integrate() {
-    double dt = this->last_times[this->last_input_index] - this->last_times[(this->last_input_index - 1) % PIDController::MAX_STORED];
-    double dI = this->last_points[this->last_input_index] - this->last_points[(this->last_input_index - 1) % PIDController::MAX_STORED];
+    double dt = this->last_times[this->last_input_index] - this->last_times[(PIDController::MAX_STORED + this->last_input_index - 1) % PIDController::MAX_STORED];
+    double dI = (this->last_points[this->last_input_index] + this->last_points[(PIDController::MAX_STORED + this->last_input_index - 1) % PIDController::MAX_STORED])/2.0;
 
     this->time_integral += dt * dI;
 
@@ -80,8 +60,8 @@ void PIDController::integrate() {
 void PIDController::differentiate() {
     // three-point central difference formula
     unsigned int lii = this->last_input_index;
-    unsigned int li = (lii - 1) % PIDController::MAX_STORED;
-    unsigned int l = (li - 1) % PIDController::MAX_STORED;
+    unsigned int li = (PIDController::MAX_STORED + lii - 1) % PIDController::MAX_STORED;
+    unsigned int l = (PIDController::MAX_STORED + li - 1) % PIDController::MAX_STORED;
     
     // t_i+1 - t-i
     double h1 = this->last_times[lii] - this->last_times[li];  
@@ -112,4 +92,33 @@ void PIDController::differentiate() {
     
     if (abs(this->derivative) > this->dv_cap) 
         this->derivative = sign(this->derivative) * this->dv_cap;
+};
+
+void PIDController::init() {
+    this->timer = Timer();
+    this->timer.start();
+    this->last_points = new double[PIDController::MAX_STORED] {0.0};
+    this->last_times = new double[PIDController::MAX_STORED] {0.0};
+    this->last_input_index = 0;
+
+    if (this->params.size() == 0)
+        this->params = randomVector(3);
+    this->intialized = true;
+};
+
+void PIDController::setCaps(double time_integral, double derivative) {
+    this->ti_cap = time_integral;
+    this->dv_cap = derivative;
+};
+
+DoubleVector PIDController::getCaps() {
+    return {this->ti_cap, this->dv_cap};
+};
+
+void PIDController::setGains(DoubleVector gains) {
+    this->params = gains;
+};
+
+DoubleVector PIDController::getGains() {
+    return this->params;
 };

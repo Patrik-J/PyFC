@@ -11,6 +11,7 @@ class PIDController : public FeedbackController {
     public:
         PIDController();
         PIDController(DoubleVector params, double setpoint);
+        ~PIDController();
 
         double requestLoop(double input) override;
         void init() override;
