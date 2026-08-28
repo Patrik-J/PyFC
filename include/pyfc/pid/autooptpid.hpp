@@ -11,7 +11,7 @@ class AutoOptimizingPID : public FeedbackController {
         AutoOptimizingPID();
         AutoOptimizingPID(DoubleVector initialParams, double setpoint, double lr = 1e-3);
         AutoOptimizingPID(double setpoint, double lr = 1e-3);
-
+        ~AutoOptimizingPID();
 
         double requestLoop(double input) override;
         void init() override;
@@ -52,7 +52,7 @@ class AutoOptimizingPID : public FeedbackController {
         // functions
         void integrate();
         void differentiate();
-        void optimize(double new_input);
+        void optimize();
 };
 
 #endif

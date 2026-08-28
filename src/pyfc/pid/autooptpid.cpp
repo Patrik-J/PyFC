@@ -2,18 +2,23 @@
 
 AutoOptimizingPID::AutoOptimizingPID() : FeedbackController(FCType::AutoOptPID) {};
 
-AutoOptimizingPID::AutoOptimizingPID(DoubleVector initialParams, double setpoint, double lr = 1e-3) : FeedbackController(FCType::AutoOptPID, setpoint) {
+AutoOptimizingPID::AutoOptimizingPID(DoubleVector initialParams, double setpoint, double lr) : FeedbackController(FCType::AutoOptPID, setpoint) {
     this->params = initialParams;
     this->lr = lr;
 };
 
-AutoOptimizingPID::AutoOptimizingPID(double setpoint, double lr = 1e-3) : FeedbackController(FCType::AutoOptPID, setpoint) {
+AutoOptimizingPID::AutoOptimizingPID(double setpoint, double lr) : FeedbackController(FCType::AutoOptPID, setpoint) {
     this->lr = lr;
 };
 
+AutoOptimizingPID::~AutoOptimizingPID() {
+    delete[] this->last_points;
+    delete[] this->last_times;
+};
+
 double AutoOptimizingPID::requestLoop(double input) {   
-    // prior to the next step, optimize the params
-    this->optimize(input);
+    if (!this->intialized) 
+        throw FeedbackControllerException("Feedback controller was not initialized! Use .init()");
     
     // get the difference to use in the PID loop
     double diff = input - this->setpoint;
@@ -40,19 +45,23 @@ double AutoOptimizingPID::requestLoop(double input) {
     this->differentiate();
     sum += this->params[2] * this->derivative;
 
+    // prior to the next step, optimize the params
+    this->optimize();
+
     // return the sum
     return sum;
 };
 
-void PIDController::init() {
+void AutoOptimizingPID::init() {
     this->timer = Timer();
     this->timer.start();
-    this->last_points = new double[PIDController::MAX_STORED] {0.0};
-    this->last_times = new double[PIDController::MAX_STORED] {0.0};
+    this->last_points = new double[AutoOptimizingPID::MAX_STORED] {0.0};
+    this->last_times = new double[AutoOptimizingPID::MAX_STORED] {0.0};
     this->last_input_index = 0;
 
     if (this->params.size() == 0)
         this->params = randomVector(3);
+    this->intialized = true;
 };
 
 void AutoOptimizingPID::setLearningRate(double lr) {
@@ -78,20 +87,20 @@ PIDController AutoOptimizingPID::getAsPIDController() {
 };
 
 void AutoOptimizingPID::integrate() {
-    double dt = this->last_times[this->last_input_index] - this->last_times[(this->last_input_index - 1) % AutoOptimizingPID::MAX_STORED];
-    double dI = this->last_points[this->last_input_index] - this->last_points[(this->last_input_index - 1) % AutoOptimizingPID::MAX_STORED];
+    double dt = this->last_times[this->last_input_index] - this->last_times[(AutoOptimizingPID::MAX_STORED + this->last_input_index - 1) % AutoOptimizingPID::MAX_STORED];
+    double dI = (this->last_points[this->last_input_index] + this->last_points[(AutoOptimizingPID::MAX_STORED + this->last_input_index - 1) % AutoOptimizingPID::MAX_STORED]) / 2.0;
 
     this->time_integral += dt * dI;
 
-    if (abs(this->time_integral) > this->ti_cap) 
+    if (std::abs(this->time_integral) > this->ti_cap) 
         this->time_integral = sign(this->time_integral) * this->ti_cap;
 };
 
 void AutoOptimizingPID::differentiate() {
     // three-point central difference formula
     unsigned int lii = this->last_input_index;
-    unsigned int li = (lii - 1) % AutoOptimizingPID::MAX_STORED;
-    unsigned int l = (li - 1) % AutoOptimizingPID::MAX_STORED;
+    unsigned int li = (AutoOptimizingPID::MAX_STORED + lii - 1) % AutoOptimizingPID::MAX_STORED;
+    unsigned int l = (AutoOptimizingPID::MAX_STORED + li - 1) % AutoOptimizingPID::MAX_STORED;
     
     // t_i+1 - t-i
     double h1 = this->last_times[lii] - this->last_times[li];  
@@ -120,28 +129,24 @@ void AutoOptimizingPID::differentiate() {
 
     this->derivative = coeff0 * I0 + coeff1 * I1 + coeff2 * I2;
     
-    if (abs(this->derivative) > this->dv_cap) 
+    if (std::abs(this->derivative) > this->dv_cap) 
         this->derivative = sign(this->derivative) * this->dv_cap;
 };
 
-void AutoOptimizingPID::optimize(double new_input) {
-    // determine the error between the setpoint and the new input
-    double err = this->setpoint - new_input;
-    double error = 0.5*std::pow(err, 2);
+void AutoOptimizingPID::optimize() {
+    // determine the error between the setpoint and the input
+    double diff = this->last_points[this->last_input_index];
+    double error = 0.5*std::pow(diff, 2);
 
     // gradient
     DoubleVector grad;
     
-    // prior point
-    unsigned int prior_idx = (this->last_input_index - 1) % AutoOptimizingPID::MAX_STORED;
-    double prior_input = this->last_points[prior_idx];
-
     // the derivatives wrt. to each parameter
-    grad.push_back(prior_input);
+    grad.push_back(diff);
     grad.push_back(this->time_integral);
     grad.push_back(this->derivative);
 
-    grad *= err;
+    grad *= diff;
 
     // gradient descent
     this->params -= this->lr * grad;
