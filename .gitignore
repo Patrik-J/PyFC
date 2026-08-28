@@ -3,4 +3,4 @@ __pycache__/
 **/__pycache__/
 *.pyd
 dist/
-*/pyfc.egg-info/
+*.egg-info/
