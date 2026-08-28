@@ -12,4 +12,13 @@ class FeedbackControllerException : std::exception {
         const char* msg;
 };
 
+class VectorMathException : std::exception {
+    public:
+        VectorMathException(const char* msg);
+        virtual const char* what() const throw();
+
+    private:
+        const char* msg;
+};
+
 #endif
