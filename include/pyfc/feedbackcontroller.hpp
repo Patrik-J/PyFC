@@ -30,6 +30,7 @@ class FeedbackController {
     protected:
         FCType type;
         double setpoint = 0.0;
+        bool intialized = false;
 };
 
 #endif 
