@@ -12,7 +12,7 @@ class PIDController : public FeedbackController {
         PIDController();
         PIDController(DoubleVector params, double setpoint);
 
-        double request_loop(double input) override;
+        double requestLoop(double input) override;
         void init() override;
 
         void setCaps(double time_integral, double derivative);
