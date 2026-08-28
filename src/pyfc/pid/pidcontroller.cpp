@@ -6,7 +6,7 @@ PIDController::PIDController(DoubleVector params, double setpoint) : FeedbackCon
     this->params = params;
 };
 
-double PIDController::request_loop(double input) {
+double PIDController::requestLoop(double input) {
     if (this->params.size() != 3)
         throw FeedbackControllerException("PID params were not set!");
     
@@ -89,6 +89,12 @@ void PIDController::differentiate() {
     // t_i - t_i-1
     double h2 = this->last_times[li] - this->last_times[l];
 
+    // simple fail-safe, if dt = 0 
+    if (h1 == 0) 
+        h1 = 1e-20;
+    if (h2 == 0)
+        h2 = 1e-20;
+    
     // y_i
     double I0 = this->last_points[lii];
     

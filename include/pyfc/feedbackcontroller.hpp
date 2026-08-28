@@ -8,7 +8,8 @@
 
 enum FCType {
     NotDefined,
-    PID
+    PID,
+    AutoOptPID
 };  
 
 class FeedbackController {
@@ -17,7 +18,7 @@ class FeedbackController {
         FeedbackController(FCType type);
         FeedbackController(FCType type, double setpoint);
 
-        virtual double request_loop(double input) = 0;
+        virtual double requestLoop(double input) = 0;
         virtual void init() = 0;
 
         void setSetpoint(double setpoint);

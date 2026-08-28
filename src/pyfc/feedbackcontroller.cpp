@@ -4,7 +4,7 @@ FeedbackController::FeedbackController() : type(FCType::NotDefined) {};
 
 FeedbackController::FeedbackController(FCType type) : type(type) {};
 
-FeedbackController::FeedbackController(FCType type) : type(type), setpoint(setpoint) {};
+FeedbackController::FeedbackController(FCType type, double setpoint) : type(type), setpoint(setpoint) {};
 
 void FeedbackController::setSetpoint(double setpoint) {
     this->setpoint = setpoint;
@@ -24,6 +24,9 @@ std::ostream& operator<<(std::ostream& strm, const FeedbackController& fc) {
         case FCType::PID:
             strm << "'PID'";
             break;
+        case FCType::AutoOptPID:
+            strm << "'Auto-Optimizing PID'";
+            break;
         case FCType::NotDefined:
             strm << "'Undefined'";
             break;
@@ -32,4 +35,5 @@ std::ostream& operator<<(std::ostream& strm, const FeedbackController& fc) {
             break;
     }
     strm << " with setpoint " << fc.getSetpoint() << std::endl;
+    return strm;
 };
