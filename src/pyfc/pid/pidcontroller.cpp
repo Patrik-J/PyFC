@@ -45,6 +45,9 @@ void PIDController::init() {
     this->last_points = new double[PIDController::MAX_STORED] {0.0};
     this->last_times = new double[PIDController::MAX_STORED] {0.0};
     this->last_input_index = 0;
+
+    if (this->params.size() == 0)
+        this->params = randomVector(3);
 };
 
 void PIDController::setCaps(double time_integral, double derivative) {
