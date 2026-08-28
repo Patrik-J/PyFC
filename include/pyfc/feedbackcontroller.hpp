@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "fc_exceptions.hpp"
+#include "fc_math.hpp"
 
 enum FCType {
     NotDefined,
