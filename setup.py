@@ -1,5 +1,5 @@
 from pybind11.setup_helpers import Pybind11Extension, build_ext
-from setuptools import setup 
+from setuptools import setup, find_packages
 
 ext_modules = [
     Pybind11Extension("pyfc._core", 
@@ -10,7 +10,9 @@ ext_modules = [
                        "src/pyfc/pid/autooptpid.cpp", 
                        "src/pyfc/timer/timer.cpp", 
                        "src/pyfc/_core.cpp"], 
-                      include_dirs=["include/pyfc", 
+                      include_dirs=[
+                                    "include",
+                                    "include/pyfc", 
                                     "include/pyfc/math", 
                                     "include/pyfc/timer", 
                                     "include/pyfc/pid"],
@@ -20,7 +22,7 @@ ext_modules = [
 setup(
     name="pyfc",
     version="0.1.0",
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     ext_modules=ext_modules, 
-    cmdclass={"build_ext": build_ext}, 
-    packages=["pyfc"], 
-    package_dir={"": "src"})
+    cmdclass={"build_ext": build_ext})
