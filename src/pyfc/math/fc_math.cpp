@@ -56,3 +56,18 @@ double sign(double d) {
     else
         return -1.0;
 };
+
+DoubleVector randomVector(unsigned int length, double mean, double std_dev) {
+    DoubleVector v(length, 0.0);
+
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution d{mean, std_dev};
+
+    auto random = [&d, &gen]{ return d(gen); };
+
+    for (unsigned int i = 0; i < length; i++)
+        v[i] = random();
+
+    return v;
+};

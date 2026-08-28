@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <random>
 
 #include "fc_exceptions.hpp"
 
@@ -16,7 +17,8 @@ DoubleVector operator*(double& d, DoubleVector& v);
 DoubleVector operator/(DoubleVector& v, double& d);
 
 double abs(DoubleVector& v);
-
 double sign(double d);
+
+DoubleVector randomVector(unsigned int length, double mean = 5.0, double std_dev = 2.0);
 
 #endif
