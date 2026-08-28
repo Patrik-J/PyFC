@@ -42,3 +42,17 @@ DoubleVector operator/(DoubleVector& v, double& d) {
     double s = 1/d;
     return v * s;
 };
+
+double abs(DoubleVector& v) {
+    double sum = 0.0;
+    for (unsigned int i = 0; i < v.size(); i++) 
+        sum += std::pow(v[i], 2.0);
+    return std::pow(sum, 0.5);
+};
+
+double sign(double d) {
+    if (d >= 0.0) 
+        return 1.0;
+    else
+        return -1.0;
+};
