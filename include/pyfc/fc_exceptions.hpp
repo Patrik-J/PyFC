@@ -3,7 +3,7 @@
 
 #include <exception>
 
-class FeedbackControllerException : std::exception {
+class FeedbackControllerException : public std::exception {
     public:
         FeedbackControllerException(const char* msg);
         virtual const char* what() const throw();
@@ -12,7 +12,7 @@ class FeedbackControllerException : std::exception {
         const char* msg;
 };
 
-class VectorMathException : std::exception {
+class VectorMathException : public std::exception {
     public:
         VectorMathException(const char* msg);
         virtual const char* what() const throw();
