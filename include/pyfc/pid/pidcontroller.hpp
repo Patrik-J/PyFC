@@ -46,8 +46,6 @@ class PIDController : public FeedbackController {
         // functions
         void integrate();
         void differentiate();
-
-        friend class AutoOptimizingPID;
 };
 
 #endif
