@@ -41,6 +41,34 @@ DoubleVector operator*(double& d, DoubleVector& v) {
 DoubleVector operator/(DoubleVector& v, double& d) {
     double s = 1/d;
     return v * s;
+}; 
+
+DoubleVector& operator+=(DoubleVector& v1, DoubleVector& v2) {
+    if (v1.size() != v2.size())
+        throw VectorMathException("Vector of unequal size cannot be used in a mathematical operation!");
+    for (unsigned int i = 0; i < v1.size(); i++) 
+        v1[i] += v2[i];
+    return v1;
+};
+
+DoubleVector& operator-=(DoubleVector& v1, DoubleVector& v2) {
+    if (v1.size() != v2.size())
+        throw VectorMathException("Vector of unequal size cannot be used in a mathematical operation!");
+    for (unsigned int i = 0; i < v1.size(); i++) 
+        v1[i] -= v2[i];
+    return v1;
+};
+
+DoubleVector& operator*=(DoubleVector& v, double& d) {
+    for (unsigned int i = 0; i < v.size(); i++) 
+        v[i] *= d;
+    return v;
+};
+
+DoubleVector& operator/=(DoubleVector& v, double& d) {
+    for (unsigned int i = 0; i < v.size(); i++) 
+        v[i] /= d;
+    return v;
 };
 
 double abs(DoubleVector& v) {

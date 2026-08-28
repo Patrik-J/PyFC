@@ -16,6 +16,11 @@ DoubleVector operator*(DoubleVector& v, double& d);
 DoubleVector operator*(double& d, DoubleVector& v);
 DoubleVector operator/(DoubleVector& v, double& d);
 
+DoubleVector& operator+=(DoubleVector& v1, DoubleVector& v2);
+DoubleVector& operator-=(DoubleVector& v1, DoubleVector& v2);
+DoubleVector& operator*=(DoubleVector& v, double& d);
+DoubleVector& operator/=(DoubleVector& v, double& d);
+
 double abs(DoubleVector& v);
 double sign(double d);
 
