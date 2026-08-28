@@ -7,3 +7,5 @@ __all__ = [
     "VectorMathException",
     "FeedbackControllerException"
 ]
+
+__version__ = "0.1.0"
